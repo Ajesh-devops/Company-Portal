@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Company Portal</title>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #f0f2f5;
+            font-family: Arial, sans-serif;
+        }
+
+        .portal-box {
+            background-color: #007BFF;
+            color: white;
+            padding: 40px;
+            border-radius: 10px;
+            width: 350px;
+            text-align: center;
+            box-shadow: 0px 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .portal-box h1 {
+            margin-bottom: 20px;
+        }
+
+        .portal-box input {
+            width: 90%;
+            padding: 10px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 5px;
+        }
+
+        .portal-box button {
+            width: 95%;
+            padding: 10px;
+            background-color: white;
+            color: #007BFF;
+            border: none;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .portal-box button:hover {
+            background-color: #e6e6e6;
+        }
+    </style>
+
+</head>
+<body>
+
+    <div class="portal-box">
+        <h1>Company Portal</h1>
+
+        <form action="/login" method="post">
+
+            <input type="text" name="username" placeholder="Enter Username" required>
+
+            <input type="password" name="password" placeholder="Enter Password" required>
+
+            <button type="submit">Login</button>
+
+        </form>
+
+    </div>
+
+</body>
+</html>

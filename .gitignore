@@ -1,5 +1,64 @@
+# =========================
+
+# Node.js Backend
+
+# =========================
+
 Backend/node_modules/
+Backend/package-lock.json
+
+# Optional (if using local SQLite)
+
+Backend/*.db
 Backend/company.db
-Frontend/__pycache__/
+
+# Logs
+
+Backend/logs/
+*.log
+
+# =========================
+
+# Python Flask Frontend
+
+# =========================
+
+Frontend/**pycache**/
 Frontend/*.pyc
+Frontend/*.pyo
+Frontend/*.pyd
+
+# Python virtual environment
+
+Frontend/venv/
+venv/
+env/
+
+# =========================
+
+# Environment variables
+
+# =========================
+
 .env
+
+# =========================
+
+# OS & Editor files
+
+# =========================
+
+.DS_Store
+Thumbs.db
+
+# VSCode
+
+.vscode/
+
+# =========================
+
+# Git internal
+
+# =========================
+
+.gitignore

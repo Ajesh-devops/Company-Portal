@@ -1,132 +1,110 @@
-const express = require("express");
-const sqlite3 = require("sqlite3").verbose();
-const bodyParser = require("body-parser");
-const cors = require("cors");
+const express = require('express');
+const mysql = require('mysql2');
+const cors = require('cors');
+const bodyParser = require('body-parser');
 
 const app = express();
-const PORT = 3000;
 
 app.use(cors());
 app.use(bodyParser.json());
 
-// Create database
-const db = new sqlite3.Database("company.db");
-
-// Create tables
-db.serialize(() => {
-
-    db.run(`
-        CREATE TABLE IF NOT EXISTS users (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            username TEXT,
-            password TEXT
-        )
-    `);
-
-    db.run(`
-        CREATE TABLE IF NOT EXISTS timesheets (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            username TEXT,
-            date TEXT,
-            hours INTEGER
-        )
-    `);
-
-    db.run(`
-        CREATE TABLE IF NOT EXISTS leaves (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            username TEXT,
-            from_date TEXT,
-            to_date TEXT,
-            reason TEXT
-        )
-    `);
-
-    // default user
-    db.run(`
-        INSERT OR IGNORE INTO users (id, username, password)
-        VALUES (1, 'admin', 'admin123')
-    `);
-
+/* RDS MySQL connection */
+const db = mysql.createConnection({
+    host: 'database-1.c7smskkuyhek.us-west-2.rds.amazonaws.com',
+    user: 'admin',
+    password: 'Ajesh123',
+    database: 'companyportal',
+    port: 3306
 });
 
-// LOGIN
-app.post("/login", (req, res) => {
+/* Connect to DB */
+db.connect(err => {
+    if (err) {
+        console.error('Database connection failed:', err);
+        return;
+    }
+    console.log('Connected to Amazon RDS MySQL');
+});
+
+/* Test route */
+app.get('/', (req, res) => {
+    res.send('Backend running with RDS');
+});
+
+/* Login API */
+app.post('/login', (req, res) => {
 
     const { username, password } = req.body;
 
-    db.get(
-        "SELECT * FROM users WHERE username=? AND password=?",
-        [username, password],
-        (err, row) => {
+    const query = `
+        SELECT * FROM users
+        WHERE username = ? AND password = ?
+    `;
 
-            if (row) {
-                res.json({ success: true });
-            } else {
-                res.json({ success: false });
-            }
+    db.query(query, [username, password], (err, result) => {
 
+        if (err) {
+            res.status(500).send(err);
+            return;
         }
-    );
+
+        if (result.length > 0) {
+            res.json({ status: "success" });
+        } else {
+            res.json({ status: "fail" });
+        }
+
+    });
 
 });
 
-// ADD TIMESHEET
-app.post("/timesheet", (req, res) => {
+/* Timesheet API */
+app.post('/timesheet', (req, res) => {
 
-    const { username, date, hours } = req.body;
+    const { username, date, hours, task } = req.body;
 
-    db.run(
-        "INSERT INTO timesheets (username, date, hours) VALUES (?, ?, ?)",
-        [username, date, hours],
-        () => {
-            res.json({ message: "Timesheet added" });
+    const query = `
+        INSERT INTO timesheets (username, work_date, hours, task)
+        VALUES (?, ?, ?, ?)
+    `;
+
+    db.query(query, [username, date, hours, task], (err, result) => {
+
+        if (err) {
+            res.status(500).send(err);
+            return;
         }
-    );
+
+        res.json({ status: "timesheet saved" });
+
+    });
 
 });
 
-// ADD LEAVE
-app.post("/leave", (req, res) => {
+/* Leave request API */
+app.post('/leave', (req, res) => {
 
     const { username, from_date, to_date, reason } = req.body;
 
-    db.run(
-        "INSERT INTO leaves (username, from_date, to_date, reason) VALUES (?, ?, ?, ?)",
-        [username, from_date, to_date, reason],
-        () => {
-            res.json({ message: "Leave request added" });
+    const query = `
+        INSERT INTO leaves (username, from_date, to_date, reason)
+        VALUES (?, ?, ?, ?)
+    `;
+
+    db.query(query, [username, from_date, to_date, reason], (err, result) => {
+
+        if (err) {
+            res.status(500).send(err);
+            return;
         }
-    );
+
+        res.json({ status: "leave submitted" });
+
+    });
 
 });
 
-// VIEW TIMESHEETS
-app.get("/timesheets/:username", (req, res) => {
-
-    db.all(
-        "SELECT * FROM timesheets WHERE username=?",
-        [req.params.username],
-        (err, rows) => {
-            res.json(rows);
-        }
-    );
-
-});
-
-// VIEW LEAVES
-app.get("/leaves/:username", (req, res) => {
-
-    db.all(
-        "SELECT * FROM leaves WHERE username=?",
-        [req.params.username],
-        (err, rows) => {
-            res.json(rows);
-        }
-    );
-
-});
-
-app.listen(PORT, () => {
-    console.log(`Backend running on http://localhost:${PORT}`);
+/* Start server */
+app.listen(3000, () => {
+    console.log("Backend running on port 3000");
 });

@@ -1,14 +1,85 @@
-name: Company Portal CI
+name: Company Portal CI/CD
 
 on:
   push:
     branches: [ main ]
 
 jobs:
-  test:
+
+  ci:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
 
-      - run: echo "Pipeline working"
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+
+    # Backend testing
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 18
+
+    - name: Install Backend Dependencies
+      working-directory: Backend
+      run: npm install
+
+    - name: Start Backend
+      working-directory: Backend
+      run: |
+        nohup node server.js &
+        sleep 5
+
+    - name: Test Backend
+      run: curl http://localhost:3000
+
+
+    # Frontend testing
+    - name: Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: 3.11
+
+    - name: Install Frontend Dependencies
+      working-directory: Frontend
+      run: pip install flask requests
+
+    - name: Start Frontend
+      working-directory: Frontend
+      run: |
+        nohup python app.py &
+        sleep 5
+
+    - name: Test Frontend
+      run: curl http://localhost:5000
+
+
+
+  cd:
+    needs: ci
+    runs-on: ubuntu-latest
+
+    steps:
+
+    - name: Deploy to EC2
+      uses: appleboy/ssh-action@v1
+
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ubuntu
+        key: ${{ secrets.EC2_SSH_KEY }}
+
+        script: |
+          cd company-portal
+          git pull origin main
+
+          # Restart backend
+          pkill node || true
+          cd Backend
+          nohup node server.js > backend.log 2>&1 &
+
+          # Restart frontend
+          cd ../Frontend
+          pkill python3 || true
+          nohup python3 app.py > frontend.log 2>&1 &

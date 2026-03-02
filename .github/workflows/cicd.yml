@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     
     env:
-    NODE_ENV: test 
+      NODE_ENV: test
 
     steps:
 
@@ -36,7 +36,7 @@ jobs:
         cat backend.log
 
     - name: Test Backend
-      run: curl http://localhost:3000
+      run: curl --fail http://localhost:3000
 
 
     # Frontend testing
@@ -52,11 +52,12 @@ jobs:
     - name: Start Frontend
       working-directory: Frontend
       run: |
-        nohup python app.py &
-        sleep 5
+        nohup python app.py > frontend.log 2>&1 &
+        sleep 10
+        cat frontend.log
 
     - name: Test Frontend
-      run: curl http://localhost:5000
+      run: curl --fail http://localhost:5000
 
 
 

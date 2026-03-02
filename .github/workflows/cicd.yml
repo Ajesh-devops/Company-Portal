@@ -30,6 +30,7 @@ jobs:
       run: |
         nohup node server.js &
         sleep 5
+        cat backend.log
 
     - name: Test Backend
       run: curl http://localhost:3000

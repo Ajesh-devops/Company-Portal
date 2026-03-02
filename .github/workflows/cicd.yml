@@ -8,6 +8,9 @@ jobs:
 
   ci:
     runs-on: ubuntu-latest
+    
+    env:
+    NODE_ENV: test 
 
     steps:
 
@@ -28,8 +31,8 @@ jobs:
     - name: Start Backend
       working-directory: Backend
       run: |
-        nohup node server.js &
-        sleep 5
+        nohup node server.js > backend.log 2>&1 &
+        sleep 10
         cat backend.log
 
     - name: Test Backend

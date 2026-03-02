@@ -27,7 +27,6 @@ def login():
 
         data = response.json()
 
-        # Check backend response
         if data["status"] == "success":
             return f"Welcome {username}!"
         else:
@@ -38,4 +37,4 @@ def login():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=5000, debug=True)

@@ -18,48 +18,65 @@ jobs:
       uses: actions/checkout@v4
 
 
-    # Backend testing
+    # =========================
+    # Backend CI
+    # =========================
+
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
         node-version: 18
+        cache: 'npm'
+        cache-dependency-path: Backend/package-lock.json
 
     - name: Install Backend Dependencies
       working-directory: Backend
-      run: npm install
+      run: npm ci
 
     - name: Start Backend
       working-directory: Backend
       run: |
         nohup node server.js > backend.log 2>&1 &
         sleep 10
+        echo "===== Backend Log ====="
         cat backend.log
 
     - name: Test Backend
       run: curl --fail http://localhost:3000
 
 
-    # Frontend testing
+    # =========================
+    # Frontend CI
+    # =========================
+
     - name: Setup Python
       uses: actions/setup-python@v5
       with:
         python-version: 3.11
+        cache: 'pip'
 
     - name: Install Frontend Dependencies
       working-directory: Frontend
-      run: pip install flask requests
+      run: |
+        pip install --upgrade pip
+        pip install flask requests
 
     - name: Start Frontend
       working-directory: Frontend
       run: |
-        nohup python app.py > frontend.log 2>&1 &
+        nohup python3 app.py > frontend.log 2>&1 &
         sleep 10
+        echo "===== Frontend Log ====="
         cat frontend.log
 
     - name: Test Frontend
       run: curl --fail http://localhost:5000
 
 
+
+  # =========================
+  # CD - Deploy to EC2
+  # =========================
 
   cd:
     needs: ci
@@ -76,15 +93,23 @@ jobs:
         key: ${{ secrets.EC2_SSH_KEY }}
 
         script: |
+
           cd company-portal
+
           git pull origin main
 
-          # Restart backend
-          pkill node || true
+          echo "Installing backend dependencies..."
           cd Backend
+          npm ci
+
+          echo "Restarting backend..."
+          pkill node || true
           nohup node server.js > backend.log 2>&1 &
 
-          # Restart frontend
+          echo "Installing frontend dependencies..."
           cd ../Frontend
+          pip3 install flask requests
+
+          echo "Restarting frontend..."
           pkill python3 || true
           nohup python3 app.py > frontend.log 2>&1 &

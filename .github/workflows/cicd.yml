@@ -6,9 +6,13 @@ on:
 
 jobs:
 
+  # ==================================
+  # CI JOB - Build and Test
+  # ==================================
+
   ci:
     runs-on: ubuntu-latest
-    
+
     env:
       NODE_ENV: test
 
@@ -39,7 +43,7 @@ jobs:
         nohup node server.js > backend.log 2>&1 &
         sleep 10
         echo "===== Backend Log ====="
-        cat backend.log
+        cat backend.log || true
 
     - name: Test Backend
       run: curl --fail http://localhost:3000
@@ -57,7 +61,7 @@ jobs:
     - name: Install Frontend Dependencies
       working-directory: Frontend
       run: |
-        pip install --upgrade pip
+        python -m pip install --upgrade pip
         pip install flask requests
 
     - name: Start Frontend
@@ -66,16 +70,16 @@ jobs:
         nohup python3 app.py > frontend.log 2>&1 &
         sleep 10
         echo "===== Frontend Log ====="
-        cat frontend.log
+        cat frontend.log || true
 
     - name: Test Frontend
       run: curl --fail http://localhost:5000
 
 
 
-  # =========================
-  # CD - Deploy to EC2
-  # =========================
+  # ==================================
+  # CD JOB - Deploy to EC2
+  # ==================================
 
   cd:
     needs: ci
@@ -93,22 +97,50 @@ jobs:
 
         script: |
 
-          cd company-portal
+          echo "Starting deployment..."
 
+          APP_DIR=/home/ubuntu/company-portal
+
+          # Clone repo if first deployment
+          if [ ! -d "$APP_DIR" ]; then
+            echo "Repository not found. Cloning..."
+            git clone https://github.com/YOUR_GITHUB_USERNAME/Company-Portal.git $APP_DIR
+          fi
+
+          cd $APP_DIR
+
+          echo "Pulling latest code..."
           git pull origin main
 
+
+          # =========================
+          # Backend Deployment
+          # =========================
+
           echo "Installing backend dependencies..."
-          cd Backend
+          cd $APP_DIR/Backend
           npm ci
 
-          echo "Restarting backend..."
+          echo "Stopping old backend..."
           pkill node || true
+
+          echo "Starting backend..."
           nohup node server.js > backend.log 2>&1 &
 
+
+          # =========================
+          # Frontend Deployment
+          # =========================
+
           echo "Installing frontend dependencies..."
-          cd ../Frontend
+          cd $APP_DIR/Frontend
           pip3 install flask requests
 
-          echo "Restarting frontend..."
+          echo "Stopping old frontend..."
           pkill python3 || true
+
+          echo "Starting frontend..."
           nohup python3 app.py > frontend.log 2>&1 &
+
+
+          echo "Deployment completed successfully!"

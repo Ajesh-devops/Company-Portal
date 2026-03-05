@@ -119,7 +119,7 @@ jobs:
             npm ci
 
             echo "Stopping old backend..."
-            pkill -f server.js || true
+            pkill -f server.js 2>/dev/null || true
 
             echo "Starting backend..."
             nohup node server.js > backend.log 2>&1 &

@@ -65,6 +65,44 @@ app.post('/login', (req, res) => {
 
     });
 
+    /* Register API */
+app.post('/register', (req, res) => {
+
+    const { username, password } = req.body;
+
+    const checkUser = "SELECT * FROM users WHERE username = ?";
+
+    db.query(checkUser, [username], (err, result) => {
+
+        if (err) {
+            res.status(500).send(err);
+            return;
+        }
+
+        if (result.length > 0) {
+            res.json({ status: "user_exists" });
+        } 
+        else {
+
+            const insertUser = "INSERT INTO users (username, password) VALUES (?, ?)";
+
+            db.query(insertUser, [username, password], (err, result) => {
+
+                if (err) {
+                    res.status(500).send(err);
+                    return;
+                }
+
+                res.json({ status: "user_created" });
+
+            });
+
+        }
+
+    });
+
+});
+
 });
 
 

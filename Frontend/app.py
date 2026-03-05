@@ -8,6 +8,7 @@ app = Flask(__name__)
 def home():
     return render_template("index.html")
 
+
 # Login route
 @app.route("/login", methods=["POST"])
 def login():
@@ -16,7 +17,6 @@ def login():
     password = request.form["password"]
 
     try:
-        # Call backend API running on EC2
         response = requests.post(
             "http://35.94.15.81:3000/login",
             json={
@@ -35,7 +35,8 @@ def login():
     except Exception as e:
         return f"Backend connection error: {e}"
 
-#register route
+
+# Register route
 @app.route('/register', methods=['GET', 'POST'])
 def register():
 
@@ -57,15 +58,11 @@ def register():
 
         if result["status"] == "success":
             return "User registered successfully"
-
         else:
             return "Registration failed"
 
     return render_template('register.html')
 
-    @app.route('/register')
-    def register_page():
-    return render_template('register.html')
 
- if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)   
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000)

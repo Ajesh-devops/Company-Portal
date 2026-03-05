@@ -18,7 +18,7 @@ def login():
     try:
         # Call backend API running on EC2
         response = requests.post(
-            "http://44.251.223.4:3000/login",
+            "http://35.94.15.81:3000/login",
             json={
                 "username": username,
                 "password": password

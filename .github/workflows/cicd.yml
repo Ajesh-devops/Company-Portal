@@ -148,7 +148,7 @@ jobs:
             cd $APP_DIR/Frontend
 
             echo "Installing frontend dependencies..."
-            pip3 install --user flask requests
+            pip3 install flask requests --break-system-packages
 
             echo "Stopping old frontend..."
             sudo fuser -k 5000/tcp 2>/dev/null || true

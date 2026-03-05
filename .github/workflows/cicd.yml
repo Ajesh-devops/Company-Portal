@@ -46,7 +46,7 @@ jobs:
       - name: Test Backend API
         run: |
           echo "Testing backend..."
-          curl --fail --silent http://localhost:5000
+          curl --fail --silent http://localhost:3000
           echo "Backend test successful"
 
 
@@ -77,7 +77,7 @@ jobs:
       - name: Test Frontend
         run: |
           echo "Testing frontend..."
-          curl --fail --silent http://localhost:8000
+          curl --fail --silent http://localhost:5000
           echo "Frontend test successful"
 
 

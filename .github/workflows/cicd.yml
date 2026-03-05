@@ -47,7 +47,7 @@ jobs:
       - name: Test Backend API
         run: |
           echo "Testing backend..."
-          curl --fail http://localhost:3000 || exit 1
+          curl --fail http://localhost:3000
           echo "Backend test successful"
 
 
@@ -77,7 +77,7 @@ jobs:
       - name: Test Frontend
         run: |
           echo "Testing frontend..."
-          curl --fail http://localhost:5000 || exit 1
+          curl --fail http://localhost:5000
           echo "Frontend test successful"
 
 
@@ -101,10 +101,12 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
 
           script: |
+
             echo "Starting deployment..."
 
             APP_DIR=/home/ubuntu/company-portal
 
+            # Clone repo if first deployment
             if [ ! -d "$APP_DIR" ]; then
               echo "Cloning repository..."
               git clone https://github.com/Ajesh-devops/Company-Portal.git $APP_DIR
@@ -121,6 +123,7 @@ jobs:
             # =========================
 
             echo "Deploying Backend..."
+
             cd $APP_DIR/Backend
 
             echo "Installing backend dependencies..."
@@ -138,6 +141,7 @@ jobs:
             # =========================
 
             echo "Deploying Frontend..."
+
             cd $APP_DIR/Frontend
 
             echo "Installing frontend dependencies..."
@@ -148,5 +152,6 @@ jobs:
 
             echo "Starting frontend..."
             nohup python3 app.py > frontend.log 2>&1 &
+
 
             echo "Deployment completed successfully!"

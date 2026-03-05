@@ -98,56 +98,55 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
+script: |
 
-          script: |
+  echo "Starting deployment..."
 
-            echo "Starting deployment..."
+  APP_DIR=/home/ubuntu/company-portal
 
-            APP_DIR=/home/ubuntu/company-portal
+  if [ ! -d "$APP_DIR" ]; then
+    echo "Cloning repository..."
+    git clone https://github.com/Ajesh-devops/Company-Portal.git $APP_DIR
+  fi
 
-            # Clone repo if not exists
-            if [ ! -d "$APP_DIR" ]; then
-              echo "Cloning repository..."
-              git clone https://github.com/Ajesh-devops/Company-Portal.git $APP_DIR
-            fi
+  cd $APP_DIR
 
-            cd $APP_DIR
-
-            echo "Pulling latest code..."
-            git pull origin main
+  echo "Pulling latest code..."
+  git pull origin main
 
 
-            # =========================
-            # Backend Deployment
-            # =========================
+  # =========================
+  # Backend Deployment
+  # =========================
 
-            echo "Deploying Backend..."
-            cd $APP_DIR/Backend
+  echo "Deploying Backend..."
+  cd $APP_DIR/Backend
 
-            echo "Installing backend dependencies..."
-            npm install
+  echo "Installing backend dependencies..."
+  npm install
 
-            echo "Stopping old backend..."
-            pkill -f server.js 2>/dev/null || true
+  echo "Stopping old backend..."
+  sudo fuser -k 3000/tcp 2>/dev/null || true
 
-            echo "Starting backend..."
-            nohup node server.js > backend.log 2>&1 &
+  echo "Starting backend..."
+  nohup node server.js > backend.log 2>&1 &
 
 
-            # =========================
-            # Frontend Deployment
-            # =========================
+  # =========================
+  # Frontend Deployment
+  # =========================
 
-            echo "Deploying Frontend..."
-            cd $APP_DIR/Frontend
+  echo "Deploying Frontend..."
+  cd $APP_DIR/Frontend
 
-            echo "Installing frontend dependencies..."
-            pip3 install flask requests
+  echo "Installing frontend dependencies..."
+  pip3 install flask requests
 
-            echo "Stopping old frontend..."
-            pkill -f app.py 2>/dev/null || true
+  echo "Stopping old frontend..."
+  sudo fuser -k 5000/tcp 2>/dev/null || true
 
-            echo "Starting frontend..."
-            nohup python3 app.py > frontend.log 2>&1 &
+  echo "Starting frontend..."
+  nohup python3 app.py > frontend.log 2>&1 &
 
-            echo "Deployment completed successfully!"
+  echo "Deployment completed successfully!"
+          

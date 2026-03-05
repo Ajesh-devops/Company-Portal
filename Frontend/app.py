@@ -38,3 +38,31 @@ def login():
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
+
+#register route
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+
+    if request.method == 'POST':
+
+        username = request.form['username']
+        password = request.form['password']
+
+        url = "http://35.94.15.81:3000/register"
+
+        data = {
+            "username": username,
+            "password": password
+        }
+
+        response = requests.post(url, json=data)
+
+        result = response.json()
+
+        if result["status"] == "success":
+            return "User registered successfully"
+
+        else:
+            return "Registration failed"
+
+    return render_template('register.html')

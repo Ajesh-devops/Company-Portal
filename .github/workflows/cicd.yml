@@ -34,7 +34,7 @@ jobs:
 
       - name: Install Backend Dependencies
         working-directory: Backend
-        run: npm install
+        run: npm ci
 
       - name: Start Backend Server
         working-directory: Backend
@@ -127,13 +127,16 @@ jobs:
             cd $APP_DIR/Backend
 
             echo "Installing backend dependencies..."
-            npm install
+            npm ci
 
             echo "Stopping old backend..."
             sudo fuser -k 3000/tcp 2>/dev/null || true
 
             echo "Starting backend..."
             nohup node server.js > backend.log 2>&1 &
+
+            sleep 5
+            echo "Backend running on port 3000"
 
 
             # =========================
@@ -145,13 +148,16 @@ jobs:
             cd $APP_DIR/Frontend
 
             echo "Installing frontend dependencies..."
-            pip3 install flask requests
+            pip3 install --user flask requests
 
             echo "Stopping old frontend..."
             sudo fuser -k 5000/tcp 2>/dev/null || true
 
             echo "Starting frontend..."
             nohup python3 app.py > frontend.log 2>&1 &
+
+            sleep 5
+            echo "Frontend running on port 5000"
 
 
             echo "Deployment completed successfully!"

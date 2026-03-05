@@ -61,7 +61,7 @@ app.post('/login', (req, res) => {
     });
 });
 
-/* Register API */
+//* Register API *//
 app.post('/register', (req, res) => {
     const { username, password } = req.body;
 

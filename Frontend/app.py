@@ -35,10 +35,6 @@ def login():
     except Exception as e:
         return f"Backend connection error: {e}"
 
-
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
-
 #register route
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -66,3 +62,10 @@ def register():
             return "Registration failed"
 
     return render_template('register.html')
+
+    @app.route('/register')
+    def register_page():
+    return render_template('register.html')
+
+ if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000, debug=True)   

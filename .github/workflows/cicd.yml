@@ -94,59 +94,59 @@ jobs:
 
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v1
+
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
-script: |
 
-  echo "Starting deployment..."
+          script: |
+            echo "Starting deployment..."
 
-  APP_DIR=/home/ubuntu/company-portal
+            APP_DIR=/home/ubuntu/company-portal
 
-  if [ ! -d "$APP_DIR" ]; then
-    echo "Cloning repository..."
-    git clone https://github.com/Ajesh-devops/Company-Portal.git $APP_DIR
-  fi
+            if [ ! -d "$APP_DIR" ]; then
+              echo "Cloning repository..."
+              git clone https://github.com/Ajesh-devops/Company-Portal.git $APP_DIR
+            fi
 
-  cd $APP_DIR
+            cd $APP_DIR
 
-  echo "Pulling latest code..."
-  git pull origin main
-
-
-  # =========================
-  # Backend Deployment
-  # =========================
-
-  echo "Deploying Backend..."
-  cd $APP_DIR/Backend
-
-  echo "Installing backend dependencies..."
-  npm install
-
-  echo "Stopping old backend..."
-  sudo fuser -k 3000/tcp 2>/dev/null || true
-
-  echo "Starting backend..."
-  nohup node server.js > backend.log 2>&1 &
+            echo "Pulling latest code..."
+            git pull origin main
 
 
-  # =========================
-  # Frontend Deployment
-  # =========================
+            # =========================
+            # Backend Deployment
+            # =========================
 
-  echo "Deploying Frontend..."
-  cd $APP_DIR/Frontend
+            echo "Deploying Backend..."
+            cd $APP_DIR/Backend
 
-  echo "Installing frontend dependencies..."
-  pip3 install flask requests
+            echo "Installing backend dependencies..."
+            npm install
 
-  echo "Stopping old frontend..."
-  sudo fuser -k 5000/tcp 2>/dev/null || true
+            echo "Stopping old backend..."
+            sudo fuser -k 3000/tcp 2>/dev/null || true
 
-  echo "Starting frontend..."
-  nohup python3 app.py > frontend.log 2>&1 &
+            echo "Starting backend..."
+            nohup node server.js > backend.log 2>&1 &
 
-  echo "Deployment completed successfully!"
-          
+
+            # =========================
+            # Frontend Deployment
+            # =========================
+
+            echo "Deploying Frontend..."
+            cd $APP_DIR/Frontend
+
+            echo "Installing frontend dependencies..."
+            pip3 install flask requests
+
+            echo "Stopping old frontend..."
+            sudo fuser -k 5000/tcp 2>/dev/null || true
+
+            echo "Starting frontend..."
+            nohup python3 app.py > frontend.log 2>&1 &
+
+            echo "Deployment completed successfully!"

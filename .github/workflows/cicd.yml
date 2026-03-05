@@ -7,6 +7,10 @@ on:
 
 jobs:
 
+# =========================
+# CI JOB
+# =========================
+
   ci:
     runs-on: ubuntu-latest
 
@@ -15,24 +19,22 @@ jobs:
 
     steps:
 
-      - name: Checkout code
+      - name: Checkout Repository
         uses: actions/checkout@v4
 
 
-      # =========================
+      # -------------------------
       # Backend CI
-      # =========================
+      # -------------------------
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 18
-          cache: npm
-          cache-dependency-path: Backend/package-lock.json
 
       - name: Install Backend Dependencies
         working-directory: Backend
-        run: npm ci
+        run: npm install
 
       - name: Start Backend Server
         working-directory: Backend
@@ -40,19 +42,18 @@ jobs:
           echo "Starting backend..."
           nohup node server.js > backend.log 2>&1 &
           sleep 10
-          echo "===== Backend Log ====="
           cat backend.log || true
 
       - name: Test Backend API
         run: |
           echo "Testing backend..."
-          curl --fail --silent http://localhost:3000
+          curl --fail http://localhost:3000 || exit 1
           echo "Backend test successful"
 
 
-      # =========================
+      # -------------------------
       # Frontend CI
-      # =========================
+      # -------------------------
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -71,16 +72,19 @@ jobs:
           echo "Starting frontend..."
           nohup python3 app.py > frontend.log 2>&1 &
           sleep 10
-          echo "===== Frontend Log ====="
           cat frontend.log || true
 
       - name: Test Frontend
         run: |
           echo "Testing frontend..."
-          curl --fail --silent http://localhost:5000
+          curl --fail http://localhost:5000 || exit 1
           echo "Frontend test successful"
 
 
+
+# =========================
+# CD JOB
+# =========================
 
   cd:
     needs: ci
@@ -101,8 +105,9 @@ jobs:
 
             APP_DIR=/home/ubuntu/company-portal
 
+            # Clone repo if not exists
             if [ ! -d "$APP_DIR" ]; then
-              echo "Repository not found. Cloning..."
+              echo "Cloning repository..."
               git clone https://github.com/Ajesh-devops/Company-Portal.git $APP_DIR
             fi
 
@@ -112,11 +117,15 @@ jobs:
             git pull origin main
 
 
+            # =========================
+            # Backend Deployment
+            # =========================
+
             echo "Deploying Backend..."
             cd $APP_DIR/Backend
 
             echo "Installing backend dependencies..."
-            npm ci
+            npm install
 
             echo "Stopping old backend..."
             pkill -f server.js 2>/dev/null || true
@@ -125,6 +134,10 @@ jobs:
             nohup node server.js > backend.log 2>&1 &
 
 
+            # =========================
+            # Frontend Deployment
+            # =========================
+
             echo "Deploying Frontend..."
             cd $APP_DIR/Frontend
 
@@ -132,10 +145,9 @@ jobs:
             pip3 install flask requests
 
             echo "Stopping old frontend..."
-            pkill -f app.py || true
+            pkill -f app.py 2>/dev/null || true
 
             echo "Starting frontend..."
             nohup python3 app.py > frontend.log 2>&1 &
-
 
             echo "Deployment completed successfully!"

@@ -18,7 +18,7 @@ def login():
 
     try:
         response = requests.post(
-            "http://35.94.15.81:3000/login",
+            "http://35.95.33.9:3000/login",
             json={
                 "username": username,
                 "password": password

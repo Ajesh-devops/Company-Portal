@@ -18,7 +18,7 @@ def login():
 
     try:
         response = requests.post(
-            "http://35.95.33.9:3000/login",
+            "http://54.203.71.231:3000/login",
             json={
                 "username": username,
                 "password": password
@@ -43,7 +43,7 @@ def register():
         username = request.form['username']
         password = request.form['password']
 
-        url = "http://35.95.33.9:3000/register"
+        url = "http://54.203.71.231:3000/register"
         data = {"username": username, "password": password}
 
         try:

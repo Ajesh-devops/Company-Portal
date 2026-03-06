@@ -43,14 +43,14 @@ def register():
         username = request.form['username']
         password = request.form['password']
 
-        url = "http://35.94.15.81:3000/register"
+        url = "http://35.95.33.9:3000/register"
         data = {"username": username, "password": password}
 
         try:
             response = requests.post(url, json=data)
             result = response.json()
-
             status = result.get("status", "fail")
+
             if status == "user_created":
                 return "User registered successfully"
             elif status == "user_exists":

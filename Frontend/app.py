@@ -39,30 +39,28 @@ def login():
 # Register route
 @app.route('/register', methods=['GET', 'POST'])
 def register():
-
     if request.method == 'POST':
-
         username = request.form['username']
         password = request.form['password']
 
         url = "http://35.94.15.81:3000/register"
+        data = {"username": username, "password": password}
 
-        data = {
-            "username": username,
-            "password": password
-        }
+        try:
+            response = requests.post(url, json=data)
+            result = response.json()
 
-        response = requests.post(url, json=data)
-
-        result = response.json()
-
-        if result["status"] == "success":
-            return "User registered successfully"
-        else:
-            return "Registration failed"
+            status = result.get("status", "fail")
+            if status == "user_created":
+                return "User registered successfully"
+            elif status == "user_exists":
+                return "Username already exists"
+            else:
+                return f"Registration failed: {result.get('error', 'Unknown error')}"
+        except Exception as e:
+            return f"Backend connection error: {e}"
 
     return render_template('register.html')
-
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
